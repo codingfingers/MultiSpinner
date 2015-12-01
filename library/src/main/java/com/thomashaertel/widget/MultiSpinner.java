@@ -28,6 +28,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
+import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.util.AttributeSet;
 import android.view.View;
@@ -41,6 +42,7 @@ public class MultiSpinner extends TextView implements OnMultiChoiceClickListener
     private boolean[] mSelected;
     private String mDefaultText;
     private String mAllText;
+    private String mTitle;
     private boolean mAllSelected;
     private MultiSpinnerListener mListener;
 
@@ -50,10 +52,21 @@ public class MultiSpinner extends TextView implements OnMultiChoiceClickListener
 
     public MultiSpinner(Context context, AttributeSet attr) {
         this(context, attr, R.attr.spinnerStyle);
+        getValues(context, attr);
     }
 
     public MultiSpinner(Context context, AttributeSet attr, int defStyle) {
         super(context, attr, defStyle);
+        getValues(context, attr);
+    }
+
+    private void getValues(Context context, AttributeSet attrs) {
+        TypedArray array = context.getTheme().obtainStyledAttributes(attrs, R.styleable.Theme, 0, 0);
+        try {
+            mTitle = array.getString(R.styleable.Theme_prompt);
+        } finally {
+            array.recycle();
+        }
     }
 
     public void onClick(DialogInterface dialog, int which, boolean isChecked) {
@@ -64,6 +77,10 @@ public class MultiSpinner extends TextView implements OnMultiChoiceClickListener
         @Override
         public void onClick(View v) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
+            if (mTitle != null) {
+                builder.setTitle(mTitle);
+            }
 
             String choices[] = new String[mAdapter.getCount()];
 
@@ -121,7 +138,7 @@ public class MultiSpinner extends TextView implements OnMultiChoiceClickListener
         SpinnerAdapter oldAdapter = this.mAdapter;
 
         setOnClickListener(null);
-        
+
         this.mAdapter = adapter;
         this.mListener = listener;
         this.mAllSelected = allSelected;
@@ -140,7 +157,7 @@ public class MultiSpinner extends TextView implements OnMultiChoiceClickListener
                 mOldSelection[i] = false;
                 mSelected[i] = allSelected;
             }
-            
+
             setOnClickListener(onClickListener);
         }
 
@@ -216,5 +233,13 @@ public class MultiSpinner extends TextView implements OnMultiChoiceClickListener
 
     public void setAllText(String allText) {
         this.mAllText = allText;
+    }
+
+    public String getPrompt() {
+        return mTitle;
+    }
+
+    public void setPrompt(String mTitle) {
+        this.mTitle = mTitle;
     }
 }
