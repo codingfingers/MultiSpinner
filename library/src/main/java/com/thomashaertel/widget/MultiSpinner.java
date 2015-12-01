@@ -120,6 +120,14 @@ public class MultiSpinner extends TextView implements OnMultiChoiceClickListener
         return this.mAdapter;
     }
 
+    public int getCount() {
+        if (this.mAdapter != null) {
+            return this.mAdapter.getCount();
+        } else {
+            return 0;
+        }
+    }
+
     DataSetObserver dataSetObserver = new DataSetObserver() {
         @Override
         public void onChanged() {
