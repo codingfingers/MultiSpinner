@@ -45,6 +45,7 @@ public class MultiSpinner extends TextView implements OnMultiChoiceClickListener
     private String mTitle;
     private boolean mAllSelected;
     private MultiSpinnerListener mListener;
+    private int mTheme;
 
     public MultiSpinner(Context context) {
         super(context);
@@ -64,6 +65,7 @@ public class MultiSpinner extends TextView implements OnMultiChoiceClickListener
         TypedArray array = context.getTheme().obtainStyledAttributes(attrs, R.styleable.Theme, 0, 0);
         try {
             mTitle = array.getString(R.styleable.Theme_prompt);
+            mTheme = array.getResourceId(R.styleable.Theme_theme, -1);
         } finally {
             array.recycle();
         }
@@ -76,8 +78,12 @@ public class MultiSpinner extends TextView implements OnMultiChoiceClickListener
     private OnClickListener onClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-
+            AlertDialog.Builder builder = null;
+            if(mTheme != -1) {
+                builder = new AlertDialog.Builder(getContext(), mTheme);
+            } else {
+                builder = new AlertDialog.Builder(getContext());
+            }
             if (mTitle != null) {
                 builder.setTitle(mTitle);
             }

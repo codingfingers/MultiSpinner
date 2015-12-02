@@ -6,5 +6,6 @@
         <!-- Default dropdown Spinner style. -->
         <attr name="dropDownSpinnerStyle" format="reference" />
         <attr name="prompt" format="string" />
+        <attr name="theme" format="integer" />
     </declare-styleable>
 </resources>
