@@ -5,7 +5,11 @@
         <attr name="spinnerStyle" format="reference" />
         <!-- Default dropdown Spinner style. -->
         <attr name="dropDownSpinnerStyle" format="reference" />
-        <attr name="prompt" format="string" />
+        <attr name="msDialogPrompt" format="string" />
         <attr name="msDialogTheme" format="integer" />
+        <attr name="msSpinnerMode" format="enum">
+            <enum name="single" value="1"/>
+            <enum name="multi" value="2"/>
+        </attr>
     </declare-styleable>
 </resources>

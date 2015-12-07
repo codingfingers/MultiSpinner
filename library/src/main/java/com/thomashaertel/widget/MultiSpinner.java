@@ -24,18 +24,20 @@
  */
 package com.thomashaertel.widget;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
+import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 public class MultiSpinner extends TextView implements OnMultiChoiceClickListener {
+    private static final int SPINNER_SINGLE_MODE = 1;
+    private static final int SPINNER_MULTI_MODE = 2;
 
     private SpinnerAdapter mAdapter;
     private boolean[] mOldSelection;
@@ -46,13 +48,14 @@ public class MultiSpinner extends TextView implements OnMultiChoiceClickListener
     private boolean mAllSelected;
     private MultiSpinnerListener mListener;
     private int mTheme;
+    private int mMode;
 
     public MultiSpinner(Context context) {
         super(context);
     }
 
     public MultiSpinner(Context context, AttributeSet attr) {
-        this(context, attr, R.attr.spinnerStyle);
+        super(context, attr);
         getValues(context, attr);
     }
 
@@ -64,8 +67,9 @@ public class MultiSpinner extends TextView implements OnMultiChoiceClickListener
     private void getValues(Context context, AttributeSet attrs) {
         TypedArray array = context.getTheme().obtainStyledAttributes(attrs, R.styleable.Theme, 0, 0);
         try {
-            mTitle = array.getString(R.styleable.Theme_prompt);
-            mTheme = array.getResourceId(R.styleable.Theme_theme, -1);
+            mTitle = array.getString(R.styleable.Theme_msDialogPrompt);
+            mTheme = array.getResourceId(R.styleable.Theme_msDialogTheme, -1);
+            mMode = array.getInt(R.styleable.Theme_msSpinnerMode, 1);
         } finally {
             array.recycle();
         }
@@ -79,7 +83,7 @@ public class MultiSpinner extends TextView implements OnMultiChoiceClickListener
         @Override
         public void onClick(View v) {
             AlertDialog.Builder builder = null;
-            if(mTheme != -1) {
+            if (mTheme != -1) {
                 builder = new AlertDialog.Builder(getContext(), mTheme);
             } else {
                 builder = new AlertDialog.Builder(getContext());
@@ -98,25 +102,40 @@ public class MultiSpinner extends TextView implements OnMultiChoiceClickListener
                 mOldSelection[i] = mSelected[i];
             }
 
-            builder.setMultiChoiceItems(choices, mSelected, MultiSpinner.this);
+            if (mMode == SPINNER_MULTI_MODE) {
+                builder.setMultiChoiceItems(choices, mSelected, MultiSpinner.this);
 
-            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    for (int i = 0; i < mSelected.length; i++) {
-                        mSelected[i] = mOldSelection[i];
+                builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        for (int i = 0; i < mSelected.length; i++) {
+                            mSelected[i] = mOldSelection[i];
+                        }
+
+                        dialog.dismiss();
                     }
+                });
 
-                    dialog.dismiss();
-                }
-            });
-
-            builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    refreshSpinner();
-                    mListener.onItemsSelected(mSelected);
-                    dialog.dismiss();
-                }
-            });
+                builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        refreshSpinner();
+                        mListener.onItemsSelected(mSelected);
+                        dialog.dismiss();
+                    }
+                });
+            }
+            if (mMode == SPINNER_SINGLE_MODE) {
+                builder.setItems(choices, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mSelected = new boolean[mSelected.length];
+                        mSelected[which] = true;
+                        if (mListener != null) {
+                            mListener.onItemsSelected(mSelected);
+                        }
+                        refreshSpinner();
+                    }
+                });
+            }
 
             builder.show();
         }
@@ -138,12 +157,18 @@ public class MultiSpinner extends TextView implements OnMultiChoiceClickListener
         @Override
         public void onChanged() {
             // all selected by default
-            mOldSelection = new boolean[mAdapter.getCount()];
             mSelected = new boolean[mAdapter.getCount()];
             for (int i = 0; i < mSelected.length; i++) {
-                mOldSelection[i] = false;
-                mSelected[i] = mAllSelected;
+                if (mOldSelection == null) {
+                    mOldSelection = new boolean[mAdapter.getCount()];
+                }
+                if (mOldSelection.length > i) {
+                    mSelected[i] = mOldSelection[i];
+                } else {
+                    mSelected[i] = mAllSelected;
+                }
             }
+            mOldSelection = new boolean[mAdapter.getCount()];
         }
     };
 
