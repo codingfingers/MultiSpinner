@@ -42,8 +42,6 @@ public class MultiSpinner extends TextView implements OnMultiChoiceClickListener
     private SpinnerAdapter mAdapter;
     private boolean[] mOldSelection;
     private boolean[] mSelected;
-    private String mDefaultText;
-    private String mAllText;
     private String mTitle;
     private boolean mAllSelected;
     private MultiSpinnerListener mListener;
@@ -200,8 +198,6 @@ public class MultiSpinner extends TextView implements OnMultiChoiceClickListener
             setOnClickListener(onClickListener);
         }
 
-        // all text on the spinner
-        setText(mAllText);
     }
 
     public void setOnItemsSelectedListener(MultiSpinnerListener listener) {
@@ -228,50 +224,23 @@ public class MultiSpinner extends TextView implements OnMultiChoiceClickListener
     private void refreshSpinner() {
         // refresh text on spinner
         StringBuffer spinnerBuffer = new StringBuffer();
-        boolean someUnselected = false;
-        boolean allUnselected = true;
 
         for (int i = 0; i < mAdapter.getCount(); i++) {
             if (mSelected[i]) {
                 spinnerBuffer.append(mAdapter.getItem(i).toString());
                 spinnerBuffer.append(", ");
-                allUnselected = false;
-            } else {
-                someUnselected = true;
             }
         }
 
-        String spinnerText;
-
-        if (!allUnselected) {
-            if (someUnselected && !(mAllText != null && mAllText.length() > 0)) {
-                spinnerText = spinnerBuffer.toString();
-                if (spinnerText.length() > 2)
-                    spinnerText = spinnerText.substring(0, spinnerText.length() - 2);
-            } else {
-                spinnerText = mAllText;
+        if (spinnerBuffer.length() > 0) {
+            if (spinnerBuffer.charAt(spinnerBuffer.length() - 1) == ' ' && spinnerBuffer.charAt(spinnerBuffer.length() - 2) == ',') {
+                spinnerBuffer = spinnerBuffer.deleteCharAt(spinnerBuffer.length() - 1);
+                spinnerBuffer = spinnerBuffer.deleteCharAt(spinnerBuffer.length() - 1);
             }
+            setText(spinnerBuffer);
         } else {
-            spinnerText = mDefaultText;
+            setText("");
         }
-
-        setText(spinnerText);
-    }
-
-    public String getDefaultText() {
-        return mDefaultText;
-    }
-
-    public void setDefaultText(String defaultText) {
-        this.mDefaultText = defaultText;
-    }
-
-    public String getAllText() {
-        return mAllText;
-    }
-
-    public void setAllText(String allText) {
-        this.mAllText = allText;
     }
 
     public String getPrompt() {
