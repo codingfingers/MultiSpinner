@@ -29,6 +29,9 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.os.Build;
 import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
 import android.view.View;
@@ -47,6 +50,8 @@ public class MultiSpinner extends TextView implements OnMultiChoiceClickListener
     private MultiSpinnerListener mListener;
     private int mTheme;
     private int mMode;
+    private Paint mPaint;
+    private float mUnderlineSize;
 
     public MultiSpinner(Context context) {
         super(context);
@@ -63,14 +68,36 @@ public class MultiSpinner extends TextView implements OnMultiChoiceClickListener
     }
 
     private void getValues(Context context, AttributeSet attrs) {
-        TypedArray array = context.getTheme().obtainStyledAttributes(attrs, R.styleable.Theme, 0, 0);
+        TypedArray array = context.getTheme().obtainStyledAttributes(attrs, R.styleable.MultiSpinner, 0, 0);
         try {
-            mTitle = array.getString(R.styleable.Theme_msDialogPrompt);
-            mTheme = array.getResourceId(R.styleable.Theme_msDialogTheme, -1);
-            mMode = array.getInt(R.styleable.Theme_msSpinnerMode, 1);
+            mTitle = array.getString(R.styleable.MultiSpinner_msDialogPrompt);
+            mTheme = array.getResourceId(R.styleable.MultiSpinner_msDialogTheme, -1);
+            mMode = array.getInteger(R.styleable.MultiSpinner_msSpinnerMode, 1);
+            int color = 0;
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                color = array.getColor(R.styleable.MultiSpinner_msUnderlineColor, getResources().getColor(android.R.color.black));
+            } else {
+                color = array.getColor(R.styleable.MultiSpinner_msUnderlineColor, getResources().getColor(android.R.color.black, null));
+            }
+            if (color != 0) {
+                mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                mPaint.setColor(color);
+            }
+            mUnderlineSize = array.getDimension(R.styleable.MultiSpinner_msUnderlineSize, 0);
+            if(mPaint != null) {
+                mPaint.setStrokeWidth(mUnderlineSize);
+            }
         } finally {
             array.recycle();
         }
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        if (mPaint != null) {
+            canvas.drawLine(0, getMeasuredHeight(), getMeasuredWidth(), getMeasuredHeight(), mPaint);
+        }
+        super.onDraw(canvas);
     }
 
     public void onClick(DialogInterface dialog, int which, boolean isChecked) {

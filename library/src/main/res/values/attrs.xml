@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="Theme">
-        <!-- Default Spinner style. -->
-        <attr name="spinnerStyle" format="reference" />
-        <!-- Default dropdown Spinner style. -->
-        <attr name="dropDownSpinnerStyle" format="reference" />
+    <declare-styleable name="MultiSpinner">
         <attr name="msDialogPrompt" format="string" />
         <attr name="msDialogTheme" format="integer" />
-        <attr name="msSpinnerMode" format="enum">
-            <enum name="single" value="1"/>
-            <enum name="multi" value="2"/>
+        <attr name="msSpinnerMode">
+            <flag name="single" value="1" />
+            <flag name="multi" value="2" />
         </attr>
+        <attr name="msUnderlineColor" format="reference|color" />
+        <attr name="msUnderlineSize" format="reference|dimension" />
     </declare-styleable>
 </resources>
